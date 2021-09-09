@@ -1,0 +1,8 @@
+{
+    "tasks" : [
+        {"id": 1, "name": "Chocolate", "done": false},
+        {"id": 2, "name": "Queso de Rallar", "done": false},
+        {"id": 3, "name": "Milanesas de Nalga", "done": false},
+        {"id": 4, "name": "1 Kilo de Helado", "done": false}
+    ]
+}
