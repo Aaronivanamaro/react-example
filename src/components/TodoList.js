@@ -4,40 +4,49 @@ import axios from 'axios'
 
 const TodoList = () => {
 
-    const [newTaskName, setNewTaskName] = useState("")
-    const [list, setList] = useState({
-        tasks : []
-    })
+    const [newTaskName, setNewTaskName] = useState(() => "")
+    const [tasks, setTasks] = useState(() => [])
+    const [loading, setLoading] = useState(() => true)
 
-    const url = "http://localhost:3001/tasks"
+    const url = "http://localhost:8000/tasks"
 
     useEffect(() => {
-        axios.get(url)
-             .then((res) => {
-                 setList({
-                     tasks: res.data
-                 })
-             })         
-    }, list)
+        setTimeout(() => {
+            axios.get(url)
+            .then((res) => {
+                setTasks( res.data )
+                setLoading(() => false)
+            })         
+        }, 3000)
+    }, [tasks])
 
     const addTask = () => {
-        setList({
-            tasks : [
-                ...list.tasks,
-                {
-                    id: Math.max(0, ...list.tasks.map(t => t.id)) + 1,
-                    name: newTaskName,
-                    done: false
-                }
-            ]
-        })
+        axios({
+            method: 'post',
+            url: url,
+            data: {
+                id: Math.max(0, ...tasks.map(t => t.id)) + 1,
+                name: newTaskName,
+                done: false
+            }
+        }) 
         setNewTaskName("")
     }
 
     const deleteTask = (id) => {
-        setList({
-            tasks: list.tasks.filter(task => task.id !== id)
-        })
+        axios.delete(`${url}/${id}`)
+    }
+
+    const checkTask = (id, name) => {
+        axios({
+            method: 'put',
+            url: `${url}/${id}`,
+            data: {
+                id: id,
+                name: name,
+                done: true
+            }
+        }) 
     }
 
     return (
@@ -46,12 +55,20 @@ const TodoList = () => {
             <li className="list-group-item active">Lista de Compras</li>
 
             {
-                list.tasks.map( task => 
-                    <li key={task.id} className="list-group-item">
+                loading ? <li className="list-group-item text-center">
+                            <div className="spinner-border"></div>
+                          </li>
+
+                : tasks.map( task => 
+                    <li key={task.id} className="list-group-item" style={task.done ? {backgroundColor: "limegreen"} : {backgroundColor: "white"}}>
                         {task.name}
                         <button className="btn btn-danger float-end"
                             onClick={ () => deleteTask(task.id)} >
                             &#10006;
+                        </button>
+                        <button className="btn btn-info float-end"
+                            onClick={ () => checkTask(task.id, task.name)} >
+                            &#10004;
                         </button>
                     </li>
                     )
